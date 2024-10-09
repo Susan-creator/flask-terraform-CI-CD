@@ -1,4 +1,4 @@
-name: Terraform CI/CD Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
@@ -10,20 +10,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.0.0
 
-    - name: Terraform Init
-      run: terraform init
+      - name: Terraform Init
+        run: terraform init
 
-    - name: Terraform Plan
-      run: terraform plan
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve
 
-    - name: Terraform Apply
-      run: terraform apply -auto-approve
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Get EC2 Instance IP
+        id: get_ip
+        run: |
+          echo "instance_ip=$(terraform output -json instance_ip | jq -r .)" >> $GITHUB_ENV
+
+      - name: Use EC2 Instance IP
+        run: echo "The public IP of the EC2 instance is $instance_ip"

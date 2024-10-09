@@ -26,7 +26,8 @@ jobs:
       - name: Debug Environment
         run: |
             echo "AWS Region: us-east-1"  # Change this to your configured region if necessary
-            echo "AWS Access Key ID: ${{ secrets.AWS_ACCESS_KEY_ID }}"
+            echo "AWS Access Key ID is set: ${{ secrets.AWS_ACCESS_KEY_ID != '' }}"
+            echo "AWS Secret Access Key is set: ${{ secrets.AWS_SECRET_ACCESS_KEY != '' }}"
 
       - name: Terraform Init
         run: terraform init

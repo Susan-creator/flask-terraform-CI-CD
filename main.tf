@@ -82,7 +82,6 @@ resource "aws_instance" "server" {
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    private_key = file("/home/lenovo/.ssh/all-key-pair.pem")
     host        = self.public_ip
   }
 

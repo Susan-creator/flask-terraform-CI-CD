@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Terraform CI/CD Pipeline
 
 on:
   push:
@@ -10,25 +10,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.0.0
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.3.0  # Specify the Terraform version you want to use
 
-      - name: Terraform Init
-        run: terraform init
+    - name: Terraform Init
+      run: terraform init
 
-      - name: Terraform Apply
-        id: apply
-        run: terraform apply -auto-approve
+    - name: Terraform Plan
+      run: terraform plan
 
-      - name: Get EC2 Instance IP
-        id: get_ip
-        run: |
-          echo "instance_ip=$(terraform output -json instance_ip | jq -r .)" >> $GITHUB_ENV
+    - name: Terraform Apply
+      run: terraform apply -auto-approve
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Use EC2 Instance IP
-        run: echo "The public IP of the EC2 instance is $instance_ip"
+    - name: Set up SSH agent
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Get EC2 Instance IP
+      id: get_ip
+      run: |
+        echo "instance_ip=$(terraform output -json instance_ip | jq -r .)" >> $GITHUB_ENV
+
+    - name: Use EC2 Instance IP
+      run: echo "The public IP of the EC2 instance is ${{ env.instance_ip }}"

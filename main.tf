@@ -1,6 +1,9 @@
 provider "aws" {
-  region = "us-east-1"
+  region     = "us-east-1"  # Make sure this is your desired region
+  access_key = var.aws_access_key_id  # Reference your variable or secret here
+  secret_key = var.aws_secret_access_key  # Reference your variable or secret here
 }
+
 
 variable "cidr" {
   default = "10.0.0.0/16"
